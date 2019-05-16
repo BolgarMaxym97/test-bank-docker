@@ -1,0 +1,44 @@
+version: '3'
+
+services:
+  web:
+    build: ./web
+    environment:
+      - APACHE_RUN_USER=#1000
+    volumes:
+      - ${API_PATH_HOST}:${API_PATH_CONTAINER}
+    ports:
+      - 8080:80
+    working_dir: ${API_PATH_CONTAINER}
+
+  app:
+    build: ./app
+    environment:
+      - APACHE_RUN_USER=#1000
+    volumes:
+      - ${APP_PATH_HOST}:${APP_PATH_CONTAINER}
+    ports:
+      - 9080:90
+    working_dir: ${APP_PATH_CONTAINER}
+    command: npm i && npm run build
+
+  db:
+    image: postgres
+    restart: always
+    environment:
+      POSTGRES_PASSWORD: 123456
+    volumes:
+      - ${DB_PATH_HOST}:/var/lib/postgresql/data
+
+  adminer:
+    image: adminer
+    restart: always
+    ports:
+      - 6080:8080
+
+  composer:
+    image: composer:1.8
+    volumes:
+      - ${API_PATH_HOST}:${API_PATH_CONTAINER}
+    working_dir: ${API_PATH_CONTAINER}
+    command: composer install
